@@ -1,17 +1,22 @@
 import { describe, expect, it } from 'vitest';
+import { make } from '../src/newtype';
 import { postMessage } from '../src/post-message';
-import { MessageResult } from '../src/types';
+import { Message, MessageResult, User } from '../src/types';
 
 describe('post-message', () => {
   it('happy path', () => {
     const expected: MessageResult = {
-      id: '123',
+      id: make<MessageResult['id']>('123'),
       thread: '-',
       status: 'active',
     };
     const actual = postMessage(
-      { id: 'test', text: 'My Message', userId: '1' },
-      { post: () => ({ id: '123', thread: '-' }) }
+      {
+        id: make<Message['id']>('test'),
+        text: 'My Message',
+        userId: make<User['id']>('1'),
+      },
+      { post: () => ({ id: make<MessageResult['id']>('123'), thread: '-' }) }
     );
     expect(actual).toStrictEqual(expected);
   });
@@ -19,9 +24,9 @@ describe('post-message', () => {
   it('unverified user posts message', () => {
     expect(() =>
       postMessage({
-        id: 'id',
+        id: make<Message['id']>('id'),
         text: 'not verified',
-        userId: '2',
+        userId: make<User['id']>('2'),
       })
     ).toThrowError(Error('User not verified'));
   });
